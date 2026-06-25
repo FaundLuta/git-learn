@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Git Learn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Mono:wght@400;500&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #f8f9fa;
+    --surface2: #f1f3f4;
+    --border: #dadce0;
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --text-hint: #80868b;
+    --blue: #1a73e8;
+    --blue-light: #e8f0fe;
+    --blue-mid: #d2e3fc;
+    --green: #1e8e3e;
+    --green-light: #e6f4ea;
+    --amber: #f29900;
+    --amber-light: #fef7e0;
+    --red: #d93025;
+    --red-light: #fce8e6;
+    --purple: #8430ce;
+    --purple-light: #f3e8fd;
+    --cyan: #007b83;
+    --cyan-light: #e4f7fb;
+    --sidebar-w: 256px;
+    --header-h: 64px;
+    --radius: 8px;
+    --radius-sm: 4px;
+    --shadow-1: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+    --shadow-2: 0 1px 2px rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  #header {
+    height: var(--header-h);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  #logo {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -.3px;
+    white-space: nowrap;
+    user-select: none;
+  }
+  #logo span { color: var(--blue); }
+
+  #progress-wrap {
+    flex: 1;
+    max-width: 400px;
+  }
+  #progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-family: 'Roboto', sans-serif;
+  }
+  #progress-bar-bg {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 2px;
+    transition: width .4s ease;
+    width: 0%;
+  }
+
+  /* ── LAYOUT ── */
+  #layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - var(--header-h));
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .sidebar-group-label {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    padding: 12px 20px 4px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px 10px 20px;
+    cursor: pointer;
+    border-radius: 0 24px 24px 0;
+    margin-right: 8px;
+    transition: background .15s;
+    user-select: none;
+    position: relative;
+  }
+  .sidebar-item:hover { background: var(--surface2); }
+  .sidebar-item.active {
+    background: var(--blue-light);
+  }
+
+  .sidebar-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Google Sans', sans-serif;
+    flex-shrink: 0;
+    color: var(--text-hint);
+    border: 1.5px solid var(--border);
+  }
+  .sidebar-item.active .sidebar-icon {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .sidebar-item.done .sidebar-icon {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+
+  .sidebar-text { flex: 1; min-width: 0; }
+  .sidebar-title {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .sidebar-item.active .sidebar-title { color: var(--blue); font-weight: 500; }
+  .sidebar-item.done .sidebar-title { color: var(--green); }
+  .sidebar-cat {
+    font-size: 11px;
+    color: var(--text-hint);
+  }
+
+  .sidebar-check {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    display: none;
+  }
+  .sidebar-item.done .sidebar-check { display: flex; }
+  .sidebar-check svg { width: 14px; height: 14px; fill: var(--green); }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px 60px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  /* ── LESSON HEADER ── */
+  .lesson-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    font-family: 'Google Sans', sans-serif;
+  }
+  .lesson-eyebrow .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .lesson-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .lesson-objective {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 640px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 12px;
+  }
+
+  /* ── STEPS ── */
+  .steps-list { margin-bottom: 28px; }
+
+  .step-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+    align-items: flex-start;
+    background: var(--bg);
+  }
+  .step-item:hover { background: var(--surface); box-shadow: var(--shadow-1); }
+  .step-item.done {
+    background: var(--green-light);
+    border-color: #a8d5b5;
+  }
+
+  .step-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all .2s;
+  }
+  .step-item.done .step-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .step-checkbox svg { width: 11px; height: 11px; fill: #fff; display: none; }
+  .step-item.done .step-checkbox svg { display: block; }
+
+  .step-action {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+  }
+  .step-item.done .step-action { color: var(--green); }
+  .step-detail {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* ── COMMAND BLOCK ── */
+  .command-wrap { margin-bottom: 28px; }
+  .command-box {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #f8f9fa;
+  }
+  .command-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .command-dots { display: flex; gap: 5px; }
+  .command-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .command-lang {
+    font-family: 'Google Sans Mono', monospace;
+    font-size: 11px;
+    color: var(--text-hint);
+  }
+  .copy-btn {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--blue);
+    background: none;
+    border: 1px solid var(--blue);
+    padding: 3px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .copy-btn:hover { background: var(--blue-light); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  .command-body {
+    padding: 16px 20px;
+    margin: 0;
+    font-family: 'Google Sans Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-primary);
+  }
+  .cmd-prompt { color: var(--text-hint); user-select: none; }
+  .cmd-comment { color: var(--text-hint); font-style: italic; }
+  .cmd-text { color: var(--blue); }
+
+  /* ── TIP ── */
+  .tip-box {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--amber-light);
+    border: 1px solid #fde293;
+    border-left: 3px solid var(--amber);
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    align-items: flex-start;
+  }
+  .tip-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tip-text {
+    font-size: 13px;
+    color: #7a5800;
+    line-height: 1.6;
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 22px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background .15s, box-shadow .15s;
+    outline: none;
+    white-space: nowrap;
+  }
+  .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .btn-text {
+    background: none;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .btn-text:hover { background: var(--surface2); }
+  .btn-text:disabled { color: var(--text-hint); border-color: var(--border); cursor: default; background: none; }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #1765cc; box-shadow: var(--shadow-1); }
+  .btn-primary:disabled { background: var(--surface2); color: var(--text-hint); cursor: default; }
+  .btn-success {
+    background: var(--green);
+    color: #fff;
+  }
+  .btn-success:hover { background: #167533; box-shadow: var(--shadow-1); }
+
+  /* scrollbar styling */
+  #sidebar::-webkit-scrollbar,
+  #main::-webkit-scrollbar { width: 6px; }
+  #sidebar::-webkit-scrollbar-thumb,
+  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 700px) {
+    #sidebar { width: 72px; min-width: 72px; }
+    .sidebar-text, .sidebar-cat, .sidebar-group-label { display: none; }
+    .sidebar-item { padding: 12px; justify-content: center; margin-right: 4px; border-radius: 0 12px 12px 0; }
+    #main { padding: 20px 18px 60px; }
+    .lesson-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div id="logo"><span>git</span> learn</div>
+  <div id="progress-wrap">
+    <div id="progress-meta">
+      <span id="progress-count">0 / 14 lessons</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div id="progress-bar-bg">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+  <div id="sidebar"></div>
+  <div id="main"></div>
+</div>
+
+<script>
+const lessons = [
+  {
+    id: 1, category: "Setup",
+    title: "Open a New Folder in VSCode",
+    objective: "Get VSCode ready with a fresh project folder so you have a clean place to start.",
+    steps: [
+      { action: "Open VSCode", detail: "Launch Visual Studio Code on your computer." },
+      { action: "Open the integrated terminal", detail: "Press Ctrl + ` (backtick) or go to Terminal → New Terminal from the top menu." },
+      { action: "Create a new folder", detail: "In the terminal, type: mkdir my-git-project and press Enter." },
+      { action: "Navigate into it", detail: "Type: cd my-git-project and press Enter." },
+      { action: "Open it in VSCode", detail: "Type: code . (with the dot) and press Enter. VSCode reloads with your folder open in the sidebar." },
+    ],
+    command: null,
+    tip: "The dot in 'code .' means 'current folder'. This is the quickest way to open any directory as a VSCode workspace.",
+  },
+  {
+    id: 2, category: "Setup",
+    title: "Configure Git Identity",
+    objective: "Tell Git who you are. Every commit you make will carry your name and email.",
+    steps: [
+      { action: "Open the terminal", detail: "Make sure you are in VSCode's integrated terminal (Ctrl + `)." },
+      { action: "Set your name", detail: 'Type: git config --global user.name "Your Name" and press Enter.' },
+      { action: "Set your email", detail: 'Type: git config --global user.email "you@example.com" and press Enter.' },
+      { action: "Verify your settings", detail: 'Type: git config --list and press Enter. Confirm your name and email appear in the list.' },
+    ],
+    command: 'git config --global user.name "Your Name"\ngit config --global user.email "you@example.com"',
+    tip: "The --global flag applies these settings to every project on this machine. You only need to run this once per computer.",
+  },
+  {
+    id: 3, category: "Creating",
+    title: "Initialize a Repository",
+    objective: "Turn an ordinary folder into a Git repository that can track changes.",
+    steps: [
+      { action: "Confirm your folder is active", detail: "The terminal prompt should show my-git-project. If not, run cd my-git-project." },
+      { action: "Run git init", detail: "Type: git init and press Enter." },
+      { action: "Read the confirmation", detail: "You will see 'Initialized empty Git repository'. A hidden .git folder was created inside your project." },
+      { action: "Check the VSCode sidebar", detail: "The Source Control icon in the left sidebar becomes active — Git is now watching your folder." },
+    ],
+    command: "git init",
+    tip: "After git init, look at the bottom-left corner of VSCode — it now shows 'main' or 'master', your current branch.",
+  },
+  {
+    id: 4, category: "Basics",
+    title: "Create a File and Check Status",
+    objective: "Create your first file and see how Git reports its state.",
+    steps: [
+      { action: "Create a file", detail: 'In the terminal type: echo "Hello Git" > hello.txt and press Enter.' },
+      { action: "Check status", detail: "Type: git status and press Enter." },
+      { action: "Read the output", detail: "Git shows hello.txt under 'Untracked files' in red — it sees the file but is not tracking it yet." },
+      { action: "Check the Source Control panel", detail: "In the left sidebar, hello.txt appears with a green U (Untracked)." },
+    ],
+    command: 'echo "Hello Git" > hello.txt\ngit status',
+    tip: "git status is your safest command. Run it constantly — it tells you exactly where you are and what needs attention. It never changes anything.",
+  },
+  {
+    id: 5, category: "Basics",
+    title: "Stage a File",
+    objective: "Add files to the staging area to prepare them for your next commit.",
+    steps: [
+      { action: "Stage a specific file", detail: "Type: git add hello.txt and press Enter." },
+      { action: "Or stage everything at once", detail: "Type: git add . to stage all changed files in the current folder." },
+      { action: "Check status again", detail: "Type: git status — hello.txt is now listed in green under 'Changes to be committed'." },
+      { action: "See it in VSCode", detail: "In the Source Control panel, hello.txt now shows A (Added) — it is staged and ready." },
+    ],
+    command: "git add hello.txt\n# or stage everything:\ngit add .",
+    tip: "Think of staging like packing a box. git add decides what goes in. git commit seals and labels the box.",
+  },
+  {
+    id: 6, category: "Basics",
+    title: "Make Your First Commit",
+    objective: "Save a permanent, labeled snapshot of your staged changes.",
+    steps: [
+      { action: "Commit with a message", detail: 'Type: git commit -m "Add hello.txt" and press Enter.' },
+      { action: "Read the output", detail: "Git confirms: 1 file changed, 1 insertion. Your first commit is saved permanently." },
+      { action: "View the history", detail: "Type: git log --oneline to see your commit with its short ID and message." },
+      { action: "VSCode confirmation", detail: "The Source Control panel now shows 0 pending changes — everything is committed." },
+    ],
+    command: 'git commit -m "Add hello.txt"',
+    tip: "Write commit messages in the present tense: 'Add feature', not 'Added feature'. Keep them short but specific enough to search later.",
+  },
+  {
+    id: 7, category: "History",
+    title: "View Commit History",
+    objective: "Browse past commits to understand what changed and when.",
+    steps: [
+      { action: "Full log", detail: "Type: git log — shows all commits with author, date, and message." },
+      { action: "Compact log", detail: "Type: git log --oneline — one line per commit, much easier to scan." },
+      { action: "Inspect a specific commit", detail: "Copy a commit ID from the log, then type: git show <commit-id>" },
+      { action: "Use VSCode Timeline", detail: "In the Explorer panel, scroll to TIMELINE at the bottom to browse file history visually." },
+    ],
+    command: "git log\ngit log --oneline",
+    tip: "Press Q to exit the log when it fills the terminal screen.",
+  },
+  {
+    id: 8, category: "Branches",
+    title: "Create and Switch Branches",
+    objective: "Isolate feature work on its own branch so main stays clean.",
+    steps: [
+      { action: "List all branches", detail: "Type: git branch — the * marks your current branch." },
+      { action: "Create a new branch", detail: "Type: git checkout -b feature-branch and press Enter." },
+      { action: "Confirm the switch", detail: "Type: git branch again — * is now next to feature-branch." },
+      { action: "See it in VSCode", detail: "The bottom-left of VSCode now shows 'feature-branch' instead of 'main'." },
+      { action: "Switch back to main", detail: "Type: git switch main to return to the main branch." },
+    ],
+    command: "git checkout -b feature-branch\ngit switch main",
+    tip: "Branches in Git are extremely cheap and fast. Create one for every feature or bug fix — there is no cost to doing so.",
+  },
+  {
+    id: 9, category: "Branches",
+    title: "Merge a Branch",
+    objective: "Bring the work from one branch into another.",
+    steps: [
+      { action: "Switch to the feature branch", detail: "Type: git switch feature-branch" },
+      { action: "Make a change and commit it", detail: 'Type: echo "Feature work" >> hello.txt then git add . then git commit -m "Add feature"' },
+      { action: "Go back to main", detail: "Type: git switch main" },
+      { action: "Merge", detail: "Type: git merge feature-branch — Git combines the changes into main." },
+      { action: "View the result", detail: "Type: git log --oneline — you will see commits from both branches in the history." },
+    ],
+    command: "git switch main\ngit merge feature-branch",
+    tip: "After merging, clean up with: git branch -d feature-branch. Deleting a merged branch is safe — its commits are now in main.",
+  },
+  {
+    id: 10, category: "Undoing",
+    title: "Undo Changes",
+    objective: "Fix mistakes at different stages — before staging, after staging, and after committing.",
+    steps: [
+      { action: "Discard unstaged edits", detail: "If you edited a file and want to throw away the changes: git restore hello.txt" },
+      { action: "Undo the last commit, keep changes staged", detail: "Type: git reset --soft HEAD~1 — removes the commit but leaves your files ready to re-commit." },
+      { action: "Undo the last commit, discard all changes", detail: "Type: git reset --hard HEAD~1 — permanently deletes uncommitted work. Use with caution." },
+      { action: "Safely reverse a past commit", detail: "Type: git revert <commit-id> — creates a new commit that undoes the old one. The safest option when collaborating." },
+    ],
+    command: "git restore hello.txt\ngit reset --soft HEAD~1\ngit revert <commit-id>",
+    tip: "Prefer git revert over git reset --hard when working with a team. It keeps history intact and avoids rewriting shared commits.",
+  },
+  {
+    id: 11, category: "Remotes",
+    title: "Connect to GitHub",
+    objective: "Push your local repository to GitHub so it is backed up and shareable.",
+    steps: [
+      { action: "Create a repo on GitHub", detail: "Go to github.com and click New Repository. Leave 'Add a README' unchecked since you already have local files." },
+      { action: "Copy the remote URL", detail: "Copy the HTTPS URL shown on GitHub (e.g. https://github.com/you/repo.git)." },
+      { action: "Add the remote", detail: "Type: git remote add origin <your-url> and press Enter." },
+      { action: "Push your code", detail: "Type: git push -u origin main — this uploads your local commits to GitHub." },
+      { action: "Verify the connection", detail: "Type: git remote -v to confirm the remote is linked correctly." },
+    ],
+    command: "git remote add origin https://github.com/you/repo.git\ngit push -u origin main",
+    tip: "The -u flag sets 'origin main' as the default push destination. After this, you can just type git push with no arguments.",
+  },
+  {
+    id: 12, category: "Remotes",
+    title: "Pull and Fetch",
+    objective: "Get the latest changes from a remote repository onto your machine.",
+    steps: [
+      { action: "Fetch without merging", detail: "Type: git fetch — downloads remote changes but does not apply them to your branch." },
+      { action: "Pull and merge", detail: "Type: git pull — downloads remote changes AND merges them into your current branch." },
+      { action: "When to use fetch", detail: "Use git fetch when you want to inspect incoming changes before merging them." },
+      { action: "When to use pull", detail: "Use git pull when you are confident the remote changes are ready to apply immediately." },
+    ],
+    command: "git fetch\ngit pull",
+    tip: "Make git pull the first thing you do each morning. It keeps your local copy in sync and prevents painful merge conflicts later.",
+  },
+  {
+    id: 13, category: "Advanced",
+    title: "Stash Your Work",
+    objective: "Temporarily set aside work-in-progress so you can switch tasks without losing anything.",
+    steps: [
+      { action: "Make some changes", detail: "Edit hello.txt with anything you like, but do not commit yet." },
+      { action: "Stash them", detail: "Type: git stash — your changes disappear from the working directory and are saved safely." },
+      { action: "Check status", detail: "Type: git status — your working directory is now clean." },
+      { action: "List stashes", detail: "Type: git stash list — shows all saved stashes with an index number." },
+      { action: "Restore your work", detail: "Type: git stash pop — your changes come back exactly as you left them." },
+    ],
+    command: "git stash\ngit stash list\ngit stash pop",
+    tip: "Stash is perfect when someone asks you to review a PR while you are mid-feature. Save, switch, review, pop — clean workflow.",
+  },
+  {
+    id: 14, category: "Advanced",
+    title: "Bisect — Find a Bug",
+    objective: "Use binary search to pinpoint exactly which commit introduced a bug.",
+    steps: [
+      { action: "Start bisect", detail: "Type: git bisect start" },
+      { action: "Mark the current state as bad", detail: "Type: git bisect bad — tells Git the current version has the bug." },
+      { action: "Mark a known-good commit", detail: "Type: git bisect good <old-commit-id> — a commit from before the bug appeared." },
+      { action: "Test the middle commit", detail: "Git checks out a commit halfway between good and bad. Test your code, then tell Git what you found." },
+      { action: "Repeat until found", detail: "Type git bisect good or git bisect bad after each test. Git narrows the range automatically." },
+      { action: "Finish bisect", detail: "Type: git bisect reset to return to your original branch once the bad commit is identified." },
+    ],
+    command: "git bisect start\ngit bisect bad\ngit bisect good <commit-id>\ngit bisect reset",
+    tip: "Git bisect finds the culprit commit in O(log n) steps. For a project with 1,000 commits, it only needs about 10 tests.",
+  },
+];
+
+const categoryMeta = {
+  Setup:    { color: "var(--green)",  light: "var(--green-light)",  dot: "#1e8e3e" },
+  Creating: { color: "var(--blue)",   light: "var(--blue-light)",   dot: "#1a73e8" },
+  Basics:   { color: "#e37400",       light: "#fff3e0",             dot: "#e37400" },
+  History:  { color: "var(--purple)", light: "var(--purple-light)", dot: "#8430ce" },
+  Branches: { color: "var(--cyan)",   light: "var(--cyan-light)",   dot: "#007b83" },
+  Undoing:  { color: "var(--red)",    light: "var(--red-light)",    dot: "#d93025" },
+  Remotes:  { color: "var(--blue)",   light: "var(--blue-mid)",     dot: "#1a73e8" },
+  Advanced: { color: "#b06000",       light: "var(--amber-light)",  dot: "#f29900" },
+};
+
+let currentIdx = 0;
+let completedLessons = new Set();
+let completedSteps = {}; // { lessonId: Set<idx> }
+let copiedTimeout = null;
+
+// ── BUILD SIDEBAR ──────────────────────────────────────────────
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '';
+
+  const groups = {};
+  lessons.forEach((l, i) => {
+    if (!groups[l.category]) groups[l.category] = [];
+    groups[l.category].push({ l, i });
+  });
+
+  Object.entries(groups).forEach(([cat, items]) => {
+    const label = document.createElement('div');
+    label.className = 'sidebar-group-label';
+    label.textContent = cat;
+    sidebar.appendChild(label);
+
+    items.forEach(({ l, i }) => {
+      const done = completedLessons.has(l.id);
+      const active = i === currentIdx;
+      const item = document.createElement('div');
+      item.className = 'sidebar-item' + (active ? ' active' : '') + (done ? ' done' : '');
+      item.innerHTML = `
+        <div class="sidebar-icon">${i + 1}</div>
+        <div class="sidebar-text">
+          <div class="sidebar-title">${l.title}</div>
+          <div class="sidebar-cat">${l.category}</div>
+        </div>
+        <div class="sidebar-check">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>`;
+      item.addEventListener('click', () => goTo(i));
+      sidebar.appendChild(item);
+    });
+  });
+}
+
+// ── BUILD MAIN CONTENT ─────────────────────────────────────────
+function buildMain() {
+  const main = document.getElementById('main');
+  const lesson = lessons[currentIdx];
+  const meta = categoryMeta[lesson.category];
+  const doneSet = completedSteps[lesson.id] || new Set();
+  const allDone = doneSet.size === lesson.steps.length;
+  const lessonDone = completedLessons.has(lesson.id);
+
+  main.innerHTML = `
+    <div class="lesson-eyebrow" style="background:${meta.light};color:${meta.color}">
+      <span class="dot" style="background:${meta.dot}"></span>
+      ${lesson.category} &nbsp;&middot;&nbsp; Lesson ${currentIdx + 1} of ${lessons.length}
+    </div>
+    <h1 class="lesson-title">${lesson.title}</h1>
+    <p class="lesson-objective">${lesson.objective}</p>
+
+    <div class="section-label">Steps — check each off as you complete it</div>
+    <div class="steps-list" id="steps-list"></div>
+
+    ${lesson.command ? `
+    <div class="command-wrap">
+      <div class="section-label">Commands to run</div>
+      <div class="command-box">
+        <div class="command-header">
+          <div class="command-dots">
+            <span class="dot-r"></span>
+            <span class="dot-y"></span>
+            <span class="dot-g"></span>
+          </div>
+          <span class="command-lang">bash</span>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+        <pre class="command-body" id="command-body"></pre>
+      </div>
+    </div>` : ''}
+
+    <div class="tip-box">
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#f29900" stroke-width="1.8"/>
+        <path d="M12 7v5" stroke="#f29900" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1" fill="#f29900"/>
+      </svg>
+      <div class="tip-text">${lesson.tip}</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-text" id="btn-prev" ${currentIdx === 0 ? 'disabled' : ''}>← Previous</button>
+      <button class="btn ${lessonDone ? 'btn-success' : allDone ? 'btn-primary' : 'btn-text'}" id="btn-next"
+        ${!allDone && !lessonDone ? 'disabled' : ''}>
+        ${lessonDone
+          ? 'Completed — Next →'
+          : allDone
+          ? 'Mark complete and continue →'
+          : `Complete all ${lesson.steps.length} steps to continue`}
+      </button>
+    </div>
+  `;
+
+  // Render steps
+  const stepsList = document.getElementById('steps-list');
+  lesson.steps.forEach((step, idx) => {
+    const done = doneSet.has(idx);
+    const div = document.createElement('div');
+    div.className = 'step-item' + (done ? ' done' : '');
+    div.innerHTML = `
+      <div class="step-checkbox">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div>
+        <div class="step-action">${step.action}</div>
+        <div class="step-detail">${step.detail}</div>
+      </div>`;
+    div.addEventListener('click', () => toggleStep(idx));
+    stepsList.appendChild(div);
+  });
+
+  // Render command
+  if (lesson.command) {
+    const body = document.getElementById('command-body');
+    body.innerHTML = lesson.command.split('\n').map(line => {
+      if (line.startsWith('#')) return `<span class="cmd-comment">${escHtml(line)}</span>`;
+      return `<span class="cmd-prompt">$ </span><span class="cmd-text">${escHtml(line)}</span>`;
+    }).join('\n');
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(lesson.command).catch(() => {});
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      clearTimeout(copiedTimeout);
+      copiedTimeout = setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1600);
+    });
+  }
+
+  // Nav
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(currentIdx - 1));
+  document.getElementById('btn-next').addEventListener('click', () => {
+    const l = lessons[currentIdx];
+    completedLessons.add(l.id);
+    updateProgress();
+    if (currentIdx < lessons.length - 1) goTo(currentIdx + 1);
+    else buildMain(); // refresh to show final state
+  });
+}
+
+function toggleStep(idx) {
+  const id = lessons[currentIdx].id;
+  if (!completedSteps[id]) completedSteps[id] = new Set();
+  const set = completedSteps[id];
+  set.has(idx) ? set.delete(idx) : set.add(idx);
+  buildMain();
+}
+
+function goTo(i) {
+  if (i < 0 || i >= lessons.length) return;
+  currentIdx = i;
+  document.getElementById('main').scrollTop = 0;
+  buildSidebar();
+  buildMain();
+}
+
+function updateProgress() {
+  const pct = Math.round(completedLessons.size / lessons.length * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = `${completedLessons.size} / ${lessons.length} lessons`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  buildSidebar();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Init
+buildSidebar();
+buildMain();
+</script>
+</body>
+</html>
